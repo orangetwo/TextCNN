@@ -47,6 +47,7 @@ tr_data = dataset_loader._load(train_path)
 te_data = testset_loader._load(test_path)
 
 
+# 这里我们是用的是 char-level 你也可以选用你喜欢的分词器 比如 jieba
 def tokenizer(sent):
 	return [token for token in sent]
 
@@ -69,10 +70,6 @@ np.save('my_file.npy', vocab.word2idx)
 args.embed_num = len(vocab.word2idx)
 args.num_class = len(target.word2idx)
 args.padding_idx = vocab.padding_idx
-# print(type(tr_data.field_arrays['ids']))
-# print(tr_data.field_arrays['ids'].content[0])
-# print(tr_data.field_arrays['target'].content[0])
-# print(target.idx2word)
 
 
 assert len(tr_data.field_arrays['ids'].content) == len(
@@ -88,8 +85,8 @@ testSet = MyDataset(te_data.field_arrays['ids'].content, te_data.field_arrays['t
 func = partial(collate_fn, padding_idx=vocab.padding_idx)
 train_iter = DataLoader(trainSet, batch_size=16, shuffle=False, collate_fn=func)
 test_iter = DataLoader(testSet, batch_size=16, shuffle=True, collate_fn=func)
-print(trainSet.data[2])
-# print(args)
+
+# 用以下方式可以访问pad 和 unknown 对应的索引
 # print(vocab.padding_idx)
 # print(vocab.unknown_idx)
 
