@@ -12,14 +12,14 @@ import pickle
 def args4textcnn():
 	parser = argparse.ArgumentParser()
 	args = parser.parse_args()
-	args.dropout = 0.5
+	args.dropout = 0.1
 	args.static = False
 	args.kernel_sizes = [3, 4, 5]
 	args.embed_num = -1
 	args.embed_dim = 128
 	args.padding_idx = -1
 	args.num_class = -1
-	args.kernel_num = 50
+	args.kernel_num = 32
 	args.epochs = 6
 	args.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -47,19 +47,33 @@ class MyDataset(Dataset):
 		return self.data[item]
 
 
-def collate_fn(examples, padding_idx=0, max_length=None):
+def collate_fn(examples, padding_idx=0, max_length=None, min_length=None):
 	"""
     process the batch samples
     """
 
 	labels = torch.LongTensor([sample[1] for sample in examples])
+	if min_length:
+		features = [sample[0] + (min_length - len(sample[0]))*[padding_idx] for sample in examples]
+	else:
+		features = [sample[0] for sample in examples]
 
-	length = max([len(sample[0]) for sample in examples])
+	# length = max([len(sample[0]) for sample in examples])
 	if max_length is None:
-		inputs = [torch.LongTensor(sample[0]) for sample in examples]
+		inputs = [torch.LongTensor(sample) for sample in features]
 	else:
 		assert isinstance(max_length, int), f"attention the type of max length!!!"
-		inputs = [torch.LongTensor(sample[0][:max_length]) for sample in examples]
+		inputs = [torch.LongTensor(sample[:max_length]) for sample in features]
+
 	out = pad_sequence(inputs, padding_value=padding_idx, batch_first=True)
 
 	return out, labels
+
+
+if __name__ == '__main__':
+
+	examples = [([2,3,4], 1), ([5,4,5,6], 0)]
+	x, y = collate_fn(examples, min_length=5)
+	print(x, y)
+
+

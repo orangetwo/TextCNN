@@ -1,18 +1,18 @@
 import torch
 import torch.nn as nn
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 
 
 def trainer(model, args, trainIter, testIter):
     device = args.device
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=2e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     ce_loss = nn.CrossEntropyLoss()
 
     total_iter = 0
-
+    print(f"每个epoch下需迭代{len(trainIter)}次")
     for e in range(args.epochs):
-        for batch in trainIter:
+        for idx,batch in enumerate(trainIter):
             total_iter += 1
             model.train()
             optimizer.zero_grad()
@@ -39,4 +39,10 @@ def trainer(model, args, trainIter, testIter):
                         turth.extend(labels.detach().cpu().tolist())
 
                 acc = accuracy_score(turth, preds)
+                print(f"第{e}个epoch下第{idx}次迭代")
+                print(f"train loss : {loss.item()}")
                 print(f"test accuracy : {acc}")
+                # print(preds)
+                # print(turth)
+
+                # print(classification_report(turth, preds))

@@ -17,8 +17,8 @@ from train import *
 
 args = args4textcnn()
 
-train_path = 'train_10.txt'
-test_path = 'test_10.txt'
+train_path = 'train_orange.txt'
+test_path = 'test_orange.txt'
 dataset_loader = CSVLoader(headers=None, sep='\t')
 testset_loader = CSVLoader(headers=None, sep='\t')
 
@@ -73,16 +73,16 @@ args.padding_idx = vocab.padding_idx
 
 
 assert len(tr_data.field_arrays['ids'].content) == len(
-	tr_data.field_arrays['target'].content), f"trainset : target dont't match ids"
+	tr_data.field_arrays['target'].content), f"trainset : target don't match ids"
 assert len(te_data.field_arrays['ids'].content) == len(
-	te_data.field_arrays['target'].content), f"testset  : target dont't match ids"
+	te_data.field_arrays['target'].content), f"testset  : target don't match ids"
 
 print(type(tr_data.field_arrays['ids'].content,))
 
 trainSet = MyDataset(tr_data.field_arrays['ids'].content, tr_data.field_arrays['target'].content)
 testSet = MyDataset(te_data.field_arrays['ids'].content, te_data.field_arrays['target'].content)
 
-func = partial(collate_fn, padding_idx=vocab.padding_idx)
+func = partial(collate_fn, padding_idx=vocab.padding_idx, min_length=max(args.kernel_sizes))
 train_iter = DataLoader(trainSet, batch_size=16, shuffle=False, collate_fn=func)
 test_iter = DataLoader(testSet, batch_size=16, shuffle=True, collate_fn=func)
 
